@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Cloud Migration & Containerization - Midterm Project
 
 **Course:** 502094 - Software Deployment, Operations and Maintenance  
@@ -19,3 +20,6 @@ Technology stack:
 npm install
 cp .env.example .env
 npm run dev
+=======
+# deployment-midterm
+>>>>>>> 0ac812696112cc2b0ff2d900337400e51087f9bf
