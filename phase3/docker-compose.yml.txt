@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   web:
-    image: holeminh05/midterm-app:latest
+    image: holeminh/midterm-app:latest
     restart: unless-stopped
     depends_on:
       - mongo
