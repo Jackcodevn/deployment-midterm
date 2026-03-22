@@ -2,7 +2,7 @@
 # Cloud Migration & Containerization - Midterm Project
 
 **Course:** 502094 - Software Deployment, Operations and Maintenance  
-**Team:** [Your names]  
+**Team:** Nguyễn Huy Hùng, Hồ Lê Minh, Ngô Thượng Tông
 **Last updated:** March 2026
 
 ## Project Overview
@@ -23,3 +23,4 @@ npm run dev
 =======
 # deployment-midterm
 >>>>>>> 0ac812696112cc2b0ff2d900337400e51087f9bf
+Add my full name to README (Phase 1 contribution)
