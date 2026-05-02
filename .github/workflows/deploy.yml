@@ -59,15 +59,17 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~
+            
+            # Remove old folder if it exists (but not a git repo)
             if [ -d "deployment-midterm" ]; then
-              echo "Repository exists, pulling latest changes..."
-              cd deployment-midterm
-              git pull origin main
-            else
-              echo "Cloning repository..."
-              git clone https://github.com/Jackcodevn/deployment-midterm.git
-              cd deployment-midterm
+              echo "Removing old deployment folder..."
+              rm -rf deployment-midterm
             fi
+            
+            # Clone fresh repository
+            echo "Cloning repository..."
+            git clone https://github.com/Jackcodevn/deployment-midterm.git
+            cd deployment-midterm
             
             echo "Deploying with Docker Compose..."
             docker-compose -f docker/docker-compose.yml pull
