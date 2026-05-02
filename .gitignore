@@ -147,7 +147,7 @@ vite.config.ts.timestamp-*
 .env
 docker-compose.override.yml
 node_modules/
-coverage
+coverage/
 logs/*.log
 uploads/*
 !uploads/.gitkeep
