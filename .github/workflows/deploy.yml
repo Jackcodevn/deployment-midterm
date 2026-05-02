@@ -52,36 +52,36 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/midterm-app:${{ github.sha }}
 
       - name: Deploy to AWS
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        command_timeout: 10m
-        script: |
-          set -e
-          
-          echo " Starting deployment..."
-          cd ~
-          
-          # Fast clone with depth 1 (only latest commit)
-          if [ -d "deployment-midterm" ]; then
-            echo "Updating existing repo..."
-            cd deployment-midterm
-            git fetch --depth 1 origin main
-            git reset --hard origin/main
-            git clean -fd
-          else
-            echo "📥 Cloning repo (shallow clone)..."
-            git clone --depth 1 https://github.com/Jackcodevn/deployment-midterm.git
-            cd deployment-midterm
-          fi
-          
-          echo "Pulling Docker image..."
-          docker-compose -f docker/docker-compose.yml pull
-          
-          echo "Deploying containers..."
-          docker-compose -f docker/docker-compose.yml up -d --force-recreate
-          
-          echo "Deployment complete!"
-          docker-compose -f docker/docker-compose.yml ps
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          command_timeout: 10m
+          script: |
+            set -e
+            
+            echo " Starting deployment..."
+            cd ~
+            
+            # Fast clone with depth 1 (only latest commit)
+            if [ -d "deployment-midterm" ]; then
+              echo "Updating existing repo..."
+              cd deployment-midterm
+              git fetch --depth 1 origin main
+              git reset --hard origin/main
+              git clean -fd
+            else
+              echo "📥 Cloning repo (shallow clone)..."
+              git clone --depth 1 https://github.com/Jackcodevn/deployment-midterm.git
+              cd deployment-midterm
+            fi
+            
+            echo "Pulling Docker image..."
+            docker-compose -f docker/docker-compose.yml pull
+            
+            echo "Deploying containers..."
+            docker-compose -f docker/docker-compose.yml up -d --force-recreate
+            
+            echo "Deployment complete!"
+            docker-compose -f docker/docker-compose.yml ps
