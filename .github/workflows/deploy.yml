@@ -57,35 +57,24 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          command_timeout: 10m
+          command_timeout: 5m
           script: |
-            echo "🚀 Starting deployment at $(date)"
-            cd ~
+            set -e
+            cd ~/deployment-midterm
             
-            # Check if deployment-midterm exists and is a git repo
-            if [ -d "deployment-midterm/.git" ]; then
-              echo "✅ Found git repository, updating..."
-              cd deployment-midterm
-              sudo git fetch origin main
-              sudo git reset --hard origin/main
-              sudo git clean -fd
-            else
-              echo "📦 Repository not found or not a git repo, cleaning up..."
-              sudo rm -rf deployment-midterm
-              echo " Cloning fresh repository..."
-              git clone --depth 1 https://github.com/Jackcodevn/deployment-midterm.git
-              cd deployment-midterm
-            fi
+            # Pull image with timeout (prevent hanging)
+            echo "⏱️ Pulling image (timeout 60s)..."
+            timeout 60 docker-compose -f docker/docker-compose.yml pull || {
+              echo "⚠️ Pull timeout/slow, trying individual services..."
+              timeout 30 docker pull ${DOCKER_USERNAME}/midterm-app:latest || echo "⚠️ Using cached image"
+            }
             
-            echo "🐳 Pulling latest Docker image..."
-            sudo docker-compose -f docker/docker-compose.yml pull
+            # Quick restart
+            echo "🔄 Quick restart..."
+            docker-compose -f docker/docker-compose.yml down --remove-orphans
+            docker-compose -f docker/docker-compose.yml up -d
             
-            echo "🔄 Stopping old containers..."
-            sudo docker-compose -f docker/docker-compose.yml down || true
-            
-            echo "🚀 Starting new containers..."
-            sudo docker-compose -f docker/docker-compose.yml up -d --force-recreate
-            
-            echo "✅ Deployment completed at $(date)"
-            echo "📊 Running containers:"
-            sudo docker-compose -f docker/docker-compose.yml ps
+            echo "✅ Done in $(date)"
+            docker ps --format "table {{.Names}}\t{{.Status}}"
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
