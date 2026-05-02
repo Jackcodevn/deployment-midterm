@@ -58,13 +58,22 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            script: |
-              cd ~/deployment-midterm
+            cd ~
+            if [ -d "deployment-midterm" ]; then
+              echo "Repository exists, pulling latest changes..."
+              cd deployment-midterm
               git pull origin main
-              docker-compose -f docker/docker-compose.yml pull
-              docker-compose -f docker/docker-compose.yml up -d --force-recreate
-              echo "✅ Deployment completed at $(date)"
-              docker-compose -f docker/docker-compose.yml ps
+            else
+              echo "Cloning repository..."
+              git clone https://github.com/Jackcodevn/deployment-midterm.git
+              cd deployment-midterm
+            fi
+            
+            echo "Deploying with Docker Compose..."
+            docker-compose -f docker/docker-compose.yml pull
+            docker-compose -f docker/docker-compose.yml up -d --force-recreate
+            echo "✅ Deployment completed at $(date)"
+            docker-compose -f docker/docker-compose.yml ps
       - name: Debug SSH Connection
         uses: appleboy/ssh-action@v1.0.3
         with:
