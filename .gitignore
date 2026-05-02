@@ -141,3 +141,20 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 >>>>>>> 0ac812696112cc2b0ff2d900337400e51087f9bf
+*.pem
+*.key
+*.crt
+.env
+docker-compose.override.yml
+node_modules/
+coverage
+logs/*.log
+uploads/*
+!uploads/.gitkeep
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate.backup
+.grunt
+.tmp
+dist/
+build/
