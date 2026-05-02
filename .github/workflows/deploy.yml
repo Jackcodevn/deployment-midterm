@@ -74,3 +74,14 @@ jobs:
             echo "SSH connection successful!"
             pwd
             whoami
+      - name: Test SSH Connection
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "✅ SSH Connected!"
+            pwd
+            whoami
+            ls -la
