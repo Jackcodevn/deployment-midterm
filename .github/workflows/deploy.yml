@@ -64,3 +64,13 @@ jobs:
             docker compose -f docker/docker-compose.yml up -d --force-recreate
             echo "✅ Deployment completed at $(date)"
             docker compose -f docker/docker-compose.yml ps
+      - name: Debug SSH Connection
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "SSH connection successful!"
+            pwd
+            whoami
