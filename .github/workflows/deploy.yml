@@ -52,57 +52,36 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/midterm-app:${{ github.sha }}
 
       - name: Deploy to AWS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ~
-            
-            # Check if folder exists and is a git repo
-            if [ -d "deployment-midterm/.git" ]; then
-              echo "Repository exists, updating..."
-              cd deployment-midterm
-              git fetch origin main
-              git reset --hard origin/main
-              git clean -fd
-            else
-              # Remove folder if it exists but isn't a git repo
-              if [ -d "deployment-midterm" ]; then
-                echo "Removing non-git folder..."
-                sudo rm -rf deployment-midterm
-              fi
-              
-              # Clone fresh repository
-              echo "Cloning repository..."
-              git clone https://github.com/Jackcodevn/deployment-midterm.git
-              cd deployment-midterm
-            fi
-            
-            echo "Deploying with Docker Compose..."
-            docker-compose -f docker/docker-compose.yml pull
-            docker-compose -f docker/docker-compose.yml up -d --force-recreate
-            echo "✅ Deployment completed at $(date)"
-            docker-compose -f docker/docker-compose.yml ps
-      - name: Debug SSH Connection
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "SSH connection successful!"
-            pwd
-            whoami
-      - name: Test SSH Connection
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "✅ SSH Connected!"
-            pwd
-            whoami
-            ls -la
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        command_timeout: 10m
+        script: |
+          set -e
+          
+          echo " Starting deployment..."
+          cd ~
+          
+          # Fast clone with depth 1 (only latest commit)
+          if [ -d "deployment-midterm" ]; then
+            echo "Updating existing repo..."
+            cd deployment-midterm
+            git fetch --depth 1 origin main
+            git reset --hard origin/main
+            git clean -fd
+          else
+            echo "📥 Cloning repo (shallow clone)..."
+            git clone --depth 1 https://github.com/Jackcodevn/deployment-midterm.git
+            cd deployment-midterm
+          fi
+          
+          echo "Pulling Docker image..."
+          docker-compose -f docker/docker-compose.yml pull
+          
+          echo "Deploying containers..."
+          docker-compose -f docker/docker-compose.yml up -d --force-recreate
+          
+          echo "Deployment complete!"
+          docker-compose -f docker/docker-compose.yml ps
