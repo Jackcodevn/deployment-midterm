@@ -60,16 +60,25 @@ jobs:
           script: |
             cd ~
             
-            # Remove old folder if it exists (but not a git repo)
-            if [ -d "deployment-midterm" ]; then
-              echo "Removing old deployment folder..."
-              rm -rf deployment-midterm
+            # Check if folder exists and is a git repo
+            if [ -d "deployment-midterm/.git" ]; then
+              echo "Repository exists, updating..."
+              cd deployment-midterm
+              git fetch origin main
+              git reset --hard origin/main
+              git clean -fd
+            else
+              # Remove folder if it exists but isn't a git repo
+              if [ -d "deployment-midterm" ]; then
+                echo "Removing non-git folder..."
+                sudo rm -rf deployment-midterm
+              fi
+              
+              # Clone fresh repository
+              echo "Cloning repository..."
+              git clone https://github.com/Jackcodevn/deployment-midterm.git
+              cd deployment-midterm
             fi
-            
-            # Clone fresh repository
-            echo "Cloning repository..."
-            git clone https://github.com/Jackcodevn/deployment-midterm.git
-            cd deployment-midterm
             
             echo "Deploying with Docker Compose..."
             docker-compose -f docker/docker-compose.yml pull
