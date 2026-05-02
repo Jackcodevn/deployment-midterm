@@ -57,31 +57,22 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          command_timeout: 10m
+          command_timeout: 5m
           script: |
-            set -e
-            
-            echo " Starting deployment..."
-            cd ~
-            
-            # Fast clone with depth 1 (only latest commit)
-            if [ -d "deployment-midterm" ]; then
-              echo "Updating existing repo..."
-              cd deployment-midterm
-              git fetch --depth 1 origin main
-              git reset --hard origin/main
-              git clean -fd
-            else
-              echo "📥 Cloning repo (shallow clone)..."
+            cd ~/deployment-midterm || {
+              echo "Repo not found, cloning..."
               git clone --depth 1 https://github.com/Jackcodevn/deployment-midterm.git
               cd deployment-midterm
-            fi
+            }
             
-            echo "Pulling Docker image..."
+            echo "🔄 Pulling latest code..."
+            git pull origin main 2>/dev/null || true
+            
+            echo "🐳 Pulling Docker image..."
             docker-compose -f docker/docker-compose.yml pull
             
-            echo "Deploying containers..."
-            docker-compose -f docker/docker-compose.yml up -d --force-recreate
+            echo "🚀 Deploying..."
+            docker-compose -f docker/docker-compose.yml up -d
             
-            echo "Deployment complete!"
-            docker-compose -f docker/docker-compose.yml ps
+            echo "✅ Done!"
+            docker ps --filter "name=midterm" --format "table {{.Names}}\t{{.Status}}"
