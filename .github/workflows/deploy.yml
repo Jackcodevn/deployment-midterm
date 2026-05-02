@@ -57,22 +57,35 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          command_timeout: 5m
+          command_timeout: 10m
           script: |
-            cd ~/deployment-midterm || {
-              echo "Repo not found, cloning..."
+            echo "🚀 Starting deployment at $(date)"
+            cd ~
+            
+            # Check if deployment-midterm exists and is a git repo
+            if [ -d "deployment-midterm/.git" ]; then
+              echo "✅ Found git repository, updating..."
+              cd deployment-midterm
+              sudo git fetch origin main
+              sudo git reset --hard origin/main
+              sudo git clean -fd
+            else
+              echo "📦 Repository not found or not a git repo, cleaning up..."
+              sudo rm -rf deployment-midterm
+              echo " Cloning fresh repository..."
               git clone --depth 1 https://github.com/Jackcodevn/deployment-midterm.git
               cd deployment-midterm
-            }
+            fi
             
-            echo "🔄 Pulling latest code..."
-            git pull origin main 2>/dev/null || true
+            echo "🐳 Pulling latest Docker image..."
+            sudo docker-compose -f docker/docker-compose.yml pull
             
-            echo "🐳 Pulling Docker image..."
-            docker-compose -f docker/docker-compose.yml pull
+            echo "🔄 Stopping old containers..."
+            sudo docker-compose -f docker/docker-compose.yml down || true
             
-            echo "🚀 Deploying..."
-            docker-compose -f docker/docker-compose.yml up -d
+            echo "🚀 Starting new containers..."
+            sudo docker-compose -f docker/docker-compose.yml up -d --force-recreate
             
-            echo "✅ Done!"
-            docker ps --filter "name=midterm" --format "table {{.Names}}\t{{.Status}}"
+            echo "✅ Deployment completed at $(date)"
+            echo "📊 Running containers:"
+            sudo docker-compose -f docker/docker-compose.yml ps
